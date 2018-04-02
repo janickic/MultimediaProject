@@ -3,7 +3,6 @@ import math
 import cv2
 import numpy as np
 
-
 from Tkinter import *
 from tkMessageBox import *
 from tkFileDialog   import askopenfilename 
@@ -11,10 +10,7 @@ from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
 
 
-
-
-# global vars
-
+# Global Variables
 root = Tk()
 filename = ['']
 v = IntVar()
@@ -23,17 +19,10 @@ l_t = Label(root, text=None)
 l = Label(root, image=None)
 l2 = Label(root, image=None)
 
-def confGui():
-	root.title("CMPT 365 Project")
-	root.geometry('600x600')
-	root.configure(background='grey')
 
+#-------------------------------------------------PART 1----------------------------------------------------#
 
-def chooseVideo():
-	name= askopenfilename(filetypes=(("All files", "*.*"),("Video files", "*.mp4;*.mpg;*.avi")))
-	print(name)
-	filename[0]=name
-
+# PART 1 - STI by Copying Pixels (Copying Columns)
 def copyCol():
 	l_t.configure(text="Computing...")
 	l_t.pack()	
@@ -90,6 +79,7 @@ def copyCol():
 	root.update()
 
 
+# PART 1 - STI by Copying Pixels (Copying Rows)
 def copyRow():
 	l_t.configure(text="Computing...")
 	l_t.pack()	
@@ -139,6 +129,14 @@ def copyRow():
 	l_t.pack()
 	root.update()
 
+#-------------------------------------------------END OF PART 1----------------------------------------------------#
+
+
+
+
+#----------------------------------------------------PART 2--------------------------------------------------------#
+
+# Change Chromaticity of frame
 def chromaticity(arr):
 	a = arr 
 	for j in range(len(a)):
@@ -152,8 +150,7 @@ def chromaticity(arr):
 	            a[j][i][2] = int(round((((a[j][i][2]+0.0)/((r+0)+g+b))*255)))
 	return a
 
-
-
+# Make a histogram per frame
 def makeHist(img_arr):  
 	new_arr = [[],[]]
 	for i in range(len(img_arr)):
@@ -177,6 +174,7 @@ def histList(img_arr):
 	return histogram_list
 
 
+# PART 2 - STI by Histogram Differences (Copying Columns)
 def histCol():
 	l_t.configure(text="Please wait, computing may take a while")
 	l_t.pack()	
@@ -241,7 +239,7 @@ def histCol():
 	l_t.pack()
 	root.update()
 
-
+# PART 2 - STI by Histogram Differences (Copying Rows)
 def histRow():
 	l_t.configure(text="Please wait, computing may take a while")
 	l_t.pack()	
@@ -303,7 +301,23 @@ def histRow():
 	l_t.pack()
 	root.update()
 
+#-------------------------------------------------END OF PART 2----------------------------------------------------#
 
+
+
+# GUI Configuration
+def confGui():
+	root.title("CMPT 365 Project")
+	root.geometry('600x600')
+	root.configure(background='grey')
+
+# Choose Video from file
+def chooseVideo():
+	name= askopenfilename(filetypes=(("All files", "*.*"),("Video files", "*.mp4;*.mpg;*.avi")))
+	print(name)
+	filename[0]=name
+
+# Redirects to function of choice
 def parseVideo(choice):
 	if (filename == []) or (filename[0] == ''):
 		showinfo("Warning", "You must select a video using the 'Choose Video' button before choosing a function")
@@ -318,19 +332,15 @@ def parseVideo(choice):
 		elif choice == 4:
 			histRow()
 
-# Open GUI
+# Main Loop, Opens GUI 
 def main():
-
 	confGui()
-
 	compute_choice = [("Rows", 0), ("Columns", 1)]
-	
 	Button(text="Choose Video", width = 70, command=lambda : chooseVideo()).pack()
 	Button(text="STI by Copying Pixels : Columns", width = 70, command=lambda : parseVideo(1)).pack()
 	Button(text="STI by Copying Pixels: Rows", width = 70, command=lambda : parseVideo(2)).pack()
 	Button(text="STI by Histogram Differences: Columns", width = 70, command=lambda : parseVideo(3)).pack()
 	Button(text="STI by Histogram Differences: Rows", width = 70, command=lambda : parseVideo(4)).pack()
- 
 	root.mainloop() 
 
 main()
