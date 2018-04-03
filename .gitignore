@@ -3,3 +3,12 @@ include
 lib
 local
 pip-selfcheck.json
+ColCpyImg.png
+HistColImg.png
+HistRowImg.png
+RowCpyImg.png
+test.py
+test2.py
+tkinter.py
+tkinter.pyc
+video.mp4
