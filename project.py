@@ -225,7 +225,7 @@ def histCol():
 	photo = cv2.imread('HistColImg.png',cv2.IMREAD_COLOR)
 	
 	cv2.namedWindow('Hit space to exit',cv2.WINDOW_NORMAL)
-	cv2.resizeWindow('Hit space to exit', 300,300)
+	cv2.resizeWindow('Hit space to exit', 1300,700)
 
 	cv2.imshow('Hit space to exit',photo)
 	cv2.waitKey(0) & 0xFF
@@ -288,7 +288,7 @@ def histRow():
 	photo = cv2.imread('HistRowImg.png',cv2.IMREAD_COLOR)
 	
 	cv2.namedWindow('Hit space to exit',cv2.WINDOW_NORMAL)
-	cv2.resizeWindow('Hit space to exit', 300,300)
+	cv2.resizeWindow('Hit space to exit', 1300,700)
 
 	cv2.imshow('Hit space to exit',photo)
 	cv2.waitKey(0) & 0xFF
@@ -305,7 +305,7 @@ def histRow():
 # GUI Configuration
 def confGui():
 	root.title("CMPT 365 Project")
-	root.geometry('600x600')
+	root.geometry('600x200')
 	root.configure(background='grey')
 
 # Choose Video from file
@@ -337,12 +337,12 @@ def quit():
 def main():
 	confGui()
 	compute_choice = [("Rows", 0), ("Columns", 1)]
-	Button(text="Choose Video", width = 70, command=lambda : chooseVideo()).pack()
+	Button(text="Choose Video", width = 60, command=lambda : chooseVideo()).pack()
 	Button(text="STI by Copying Pixels : Columns", width = 70, command=lambda : parseVideo(1)).pack()
 	Button(text="STI by Copying Pixels: Rows", width = 70, command=lambda : parseVideo(2)).pack()
 	Button(text="STI by Histogram Differences: Columns", width = 70, command=lambda : parseVideo(3)).pack()
 	Button(text="STI by Histogram Differences: Rows", width = 70, command=lambda : parseVideo(4)).pack()
-	Button(text="Exit", width = 50, command=lambda : quit()).pack()
+	Button(text="Exit", width = 60, command=lambda : quit()).pack()
 
 	root.mainloop() 
 
