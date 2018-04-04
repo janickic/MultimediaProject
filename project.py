@@ -13,11 +13,7 @@ import matplotlib.pyplot as plt
 # Global Variables
 root = Tk()
 filename = ['']
-# v = IntVar()
-# v.set(0) #initially set to rows
 label = Label(root, text=None)
-# l = Label(root, image=None)
-# l2 = Label(root, image=None)
 
 
 #-------------------------------------------------PART 1----------------------------------------------------#
@@ -129,32 +125,32 @@ def copyRow():
 
 # Change Chromaticity of frame
 def chromaticity(frame):
-	new_arr = frame 
+	frame_arr = frame 
 	for j in range(len(frame)):
 	    for i in range(len(frame[0])):
 	        R, G, B = frame[j][i][0], frame[j][i][1], frame[j][i][2]
 	        if(R==0)&(G==0)&(B==0):
-	            new_arr[j][i][0], new_arr[j][i][1], new_arr[j][i][2] = 0, 0, 0
+	            frame_arr[j][i][0], frame_arr[j][i][1], frame_arr[j][i][2] = 0, 0, 0
 	        else:
 	        	# r
-	            new_arr[j][i][0] = int(round((((R+0.0)/((R+0)+G+B))*255)))
+	            frame_arr[j][i][0] = int(round((((R+0.0)/((R+0)+G+B))*255)))
 	            # g
-	            new_arr[j][i][1] = int(round((((G+0.0)/((R+0)+G+B))*255)))
+	            frame_arr[j][i][1] = int(round((((G+0.0)/((R+0)+G+B))*255)))
 	            # b, won't use this
-	            new_arr[j][i][2] = int(round((((B+0.0)/((R+0)+G+B))*255)))
-	return new_arr
+	            frame_arr[j][i][2] = int(round((((B+0.0)/((R+0)+G+B))*255)))
+	return frame_arr
 
 # Make a histogram per frame
-def makeHist(img_arr):  
+def makeHist(frame):  
 	new_arr = [[],[]]
-	for i in range(len(img_arr)):
+	for i in range(len(frame)):
 		# r
-		new_arr[0].append(img_arr[i][0]) 
+		new_arr[0].append(frame[i][0]) 
 		# g
-		new_arr[1].append(img_arr[i][1]) 
+		new_arr[1].append(frame[i][1]) 
 
 	new_arr = np.asarray(new_arr, dtype=np.uint8)   
-	bins = int(1 + math.log(len(img_arr), 2)) 
+	bins = int(1 + math.log(len(frame), 2)) 
 	bin_range = [0, 256, 0, 256] 
 
 	hist = cv2.calcHist(new_arr, [0, 1], None, [bins, bins], bin_range) 
@@ -163,10 +159,8 @@ def makeHist(img_arr):
 # Returns list of histograms
 def histList(img_arr):
 	histogram_list = []
-	run = len(img_arr)
 	for i in range(len(img_arr)):
-		histogram_list.append(makeHist(img_arr[i]))
-    
+		histogram_list.append(makeHist(img_arr[i]))    
 	return histogram_list
 
 
@@ -175,7 +169,7 @@ def histCol():
 	label.configure(text="Please wait, computing may take a while")
 	label.pack()	
 	root.update()
-	count = 0   
+	firstFrame = True   
 	cap = cv2.VideoCapture(filename[0]) 
 
 	if not cap.isOpened():
@@ -193,9 +187,9 @@ def histCol():
 		frame = cv2.resize(frame, (32, 32))
 
         # Array A stores list of frames
-		if count == 0:
+		if firstFrame:
 			A = [chromaticity([frame[i]]) for i in range(32)]
-			count = count + 1
+			firstFrame = False
 		else:
 			for i in range(32):
 				A[i].append(frame[i])
@@ -207,19 +201,20 @@ def histCol():
     # Column dominant matrix
 	column_dominant = np.transpose(A, (2, 1, 0, 3)) 
    
-	histogram_list = []
+	histogram_diff = []
 	for i in range(len(A)): 
-		chrom_list = np.asarray(column_dominant[0], dtype=np.uint8) 
+		chrom_list = np.asarray(column_dominant[i], dtype=np.uint8) 
+		# Make histograms
 		L = histList(chrom_list)
 		# Find difference in histograms
 		L2 = []
 		for j in range((len(L))-1):
 			L2.append(cv2.compareHist(L[j],L[j+1],2))
 
-		histogram_list.append(L2)
-	histogram_list = np.dot(histogram_list, (1.0/32))
-	histogram_list = np.dot(histogram_list, 255)
-	img = Image.fromarray(np.asarray(histogram_list, dtype=np.uint8), "L")
+		histogram_diff.append(L2)
+	histogram_diff = np.dot(histogram_diff, (1.0/32))
+	histogram_diff = np.dot(histogram_diff, 255)
+	img = Image.fromarray(np.asarray(histogram_diff, dtype=np.uint8), "L")
 
 	img.save('HistColImg.png')
 	photo = cv2.imread('HistColImg.png',cv2.IMREAD_COLOR)
@@ -240,7 +235,7 @@ def histRow():
 	label.configure(text="Please wait, computing may take a while")
 	label.pack()	
 	root.update()
-	count = 0   
+	firstFrame = True  
 	cap = cv2.VideoCapture(filename[0]) 
 
 	if not cap.isOpened():
@@ -258,9 +253,9 @@ def histRow():
 		frame = cv2.resize(frame, (32, 32))
 
         # Array A stores list of frames
-		if count == 0:
+		if firstFrame:
 			A = [chromaticity([frame[i]]) for i in range(32)]
-			count = count + 1
+			firstFrame = False
 		else:
 			for i in range(32):
 				A[i].append(frame[i])
@@ -270,19 +265,20 @@ def histRow():
 		A[i] = chromaticity(A[i])
         
 
-	histogram_list = []
+	histogram_diff = []
 	for i in range(len(A)): 
-		chrom_list = np.asarray(A[i], dtype=np.uint8) 
+		chrom_list = np.asarray(A[i], dtype=np.uint8)
+		# Make histograms 
 		L = histList(chrom_list)
 		# Find difference in histograms
 		L2 = []
 		for j in range((len(L))-1):
 			L2.append(cv2.compareHist(L[j],L[j+1],2))
 
-		histogram_list.append(L2)
-	histogram_list = np.dot(histogram_list, (1.0/32))
-	histogram_list = np.dot(histogram_list, 255)
-	img = Image.fromarray(np.asarray(histogram_list, dtype=np.uint8), "L")
+		histogram_diff.append(L2)
+	histogram_diff = np.dot(histogram_diff, (1.0/32))
+	histogram_diff = np.dot(histogram_diff, 255)
+	img = Image.fromarray(np.asarray(histogram_diff, dtype=np.uint8), "L")
 
 	img.save('HistRowImg.png')
 	photo = cv2.imread('HistRowImg.png',cv2.IMREAD_COLOR)
@@ -336,7 +332,7 @@ def quit():
 # Main Loop, Opens GUI 
 def main():
 	confGui()
-	compute_choice = [("Rows", 0), ("Columns", 1)]
+
 	Button(text="Choose Video", width = 60, command=lambda : chooseVideo()).pack()
 	Button(text="STI by Copying Pixels : Columns", width = 70, command=lambda : parseVideo(1)).pack()
 	Button(text="STI by Copying Pixels: Rows", width = 70, command=lambda : parseVideo(2)).pack()
