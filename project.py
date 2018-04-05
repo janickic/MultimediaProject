@@ -1,20 +1,19 @@
-#cmpt365 project
+# Cmpt365 project
+# Group: Camille Janicki
+
 import math
 import cv2
 import numpy as np
-
 from Tkinter import *
 from tkMessageBox import *
 from tkFileDialog   import askopenfilename 
 from PIL import Image, ImageTk
 import matplotlib.pyplot as plt
 
-
-# Global Variables
+# Global Variables for GUI
 root = Tk()
 filename = ['']
 label = Label(root, text=None)
-
 
 #-------------------------------------------------PART 1----------------------------------------------------#
 
@@ -24,6 +23,7 @@ def copyCol():
 	label.pack()	
 	root.update()
 
+	# Ensuring the chosen file was an mp4
 	cap = cv2.VideoCapture(filename[0])
 	if not cap.isOpened():
 		print("can't open the file")
@@ -40,6 +40,7 @@ def copyCol():
 		ret, frame = cap.read()
 		if ret == True:
 			col =  frame[:,width/2]
+			# Adding column to image
 			blank_image[:,count_frame] = col
 			# Operations on the frame 
 			color = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -51,13 +52,15 @@ def copyCol():
 				break
 		else:
 			break
-
 	# When everything done, release the capture
 	cap.release()
 	cv2.destroyAllWindows()
 
+	# Save as png
 	img = Image.fromarray(blank_image, 'RGB')
 	img.save('ColCpyImg.png')
+
+	# Display photo
 	photo = cv2.imread('ColCpyImg.png',cv2.IMREAD_COLOR)
 	cv2.imshow('Hit space to exit',photo)
 	cv2.waitKey(0) & 0xFF
@@ -74,6 +77,7 @@ def copyRow():
 	label.pack()	
 	root.update()
 
+	# Ensuring the chosen file was an mp4
 	cap = cv2.VideoCapture(filename[0])
 	if not cap.isOpened():
 		print("can't open the file")
@@ -90,7 +94,9 @@ def copyRow():
 		ret, frame = cap.read()
 		if ret == True:
 			row =  frame[height/2,:]
+			# Adding row to image
 			blank_image[count_frame,:] = row
+			# Operations on frame
 			color = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 		    # Display the resulting frame
 			cv2.imshow('Collecting rows',color)
@@ -99,14 +105,16 @@ def copyRow():
 				break
 		else:
 			break
-
 	# When everything done, release the capture
 	cap.release()
 	cv2.destroyAllWindows()
 
+	# Save as png
 	rot = np.rot90(blank_image)
 	img = Image.fromarray(rot, 'RGB')
 	img.save('RowCpyImg.png')
+
+	# Display photo
 	photo = cv2.imread('RowCpyImg.png',cv2.IMREAD_COLOR)
 	cv2.imshow('Hit space to exit',photo)
 	cv2.waitKey(0) & 0xFF
@@ -117,7 +125,6 @@ def copyRow():
 	root.update()
 
 #-------------------------------------------------END OF PART 1----------------------------------------------------#
-
 
 
 
@@ -149,16 +156,21 @@ def makeHist(frame):
 		# g
 		new_arr[1].append(frame[i][1]) 
 
-	new_arr = np.asarray(new_arr, dtype=np.uint8)   
+	# Make ndarray with only r and g values
+	new_arr = np.asarray(new_arr, dtype=np.uint8)
+
+	# Making bins   
 	bins = int(1 + math.log(len(frame), 2)) 
 	bin_range = [0, 256, 0, 256] 
 
+	# Calculate hist
 	hist = cv2.calcHist(new_arr, [0, 1], None, [bins, bins], bin_range) 
 	return hist
 
 # Returns list of histograms
 def histList(img_arr):
 	histogram_list = []
+	# Append historgram per frame
 	for i in range(len(img_arr)):
 		histogram_list.append(makeHist(img_arr[i]))    
 	return histogram_list
@@ -170,11 +182,13 @@ def histCol():
 	label.pack()	
 	root.update()
 	firstFrame = True   
-	cap = cv2.VideoCapture(filename[0]) 
 
+	# Ensuring the chosen file was an mp4
+	cap = cv2.VideoCapture(filename[0]) 
 	if not cap.isOpened():
 		print("can't open the file")
 
+	# Looping through video, frame-by-frame
 	while(True):
 		try:
 			ret, frame = cap.read()
@@ -212,16 +226,19 @@ def histCol():
 			L2.append(cv2.compareHist(L[j],L[j+1],2))
 
 		histogram_diff.append(L2)
+
+	# Dividing each histogram by its sum, so that each adds up to unity 
 	histogram_diff = np.dot(histogram_diff, (1.0/32))
 	histogram_diff = np.dot(histogram_diff, 255)
+	
+	# Save as png
 	img = Image.fromarray(np.asarray(histogram_diff, dtype=np.uint8), "L")
-
 	img.save('HistColImg.png')
 	photo = cv2.imread('HistColImg.png',cv2.IMREAD_COLOR)
 	
+	# Display photo
 	cv2.namedWindow('Hit space to exit',cv2.WINDOW_NORMAL)
 	cv2.resizeWindow('Hit space to exit', 1300,700)
-
 	cv2.imshow('Hit space to exit',photo)
 	cv2.waitKey(0) & 0xFF
 	cv2.destroyAllWindows()
@@ -236,11 +253,13 @@ def histRow():
 	label.pack()	
 	root.update()
 	firstFrame = True  
-	cap = cv2.VideoCapture(filename[0]) 
 
+	# Ensuring the chosen file was an mp4
+	cap = cv2.VideoCapture(filename[0]) 
 	if not cap.isOpened():
 		print("can't open the file")
 
+	# Looping through video, frame-by-frame
 	while(True):
 		try:
 			ret, frame = cap.read()
@@ -264,7 +283,6 @@ def histRow():
 	for i in range(len(A)):
 		A[i] = chromaticity(A[i])
         
-
 	histogram_diff = []
 	for i in range(len(A)): 
 		chrom_list = np.asarray(A[i], dtype=np.uint8)
@@ -276,16 +294,19 @@ def histRow():
 			L2.append(cv2.compareHist(L[j],L[j+1],2))
 
 		histogram_diff.append(L2)
+
+	# Dividing each histogram by its sum, so that each adds up to unity 
 	histogram_diff = np.dot(histogram_diff, (1.0/32))
 	histogram_diff = np.dot(histogram_diff, 255)
+	
+	# Save as png
 	img = Image.fromarray(np.asarray(histogram_diff, dtype=np.uint8), "L")
-
 	img.save('HistRowImg.png')
 	photo = cv2.imread('HistRowImg.png',cv2.IMREAD_COLOR)
 	
+	# Display photo
 	cv2.namedWindow('Hit space to exit',cv2.WINDOW_NORMAL)
 	cv2.resizeWindow('Hit space to exit', 1300,700)
-
 	cv2.imshow('Hit space to exit',photo)
 	cv2.waitKey(0) & 0xFF
 	cv2.destroyAllWindows()
@@ -297,7 +318,6 @@ def histRow():
 #-------------------------------------------------END OF PART 2----------------------------------------------------#
 
 
-
 # GUI Configuration
 def confGui():
 	root.title("CMPT 365 Project")
@@ -306,15 +326,16 @@ def confGui():
 
 # Choose Video from file
 def chooseVideo():
-	name= askopenfilename(filetypes=(("All files", "*.*"),("Video files", "*.mp4;*.mpg;*.avi")))
+	name = askopenfilename(filetypes=(("All files", "*.*"),("Video files", "*.mp4;*.mpg;*.avi")))
 	print(name)
-	filename[0]=name
+	# Set global variable filename
+	filename[0] = name
 
 # Redirects to function of choice
 def parseVideo(choice):
+	# Ensures file is chosen
 	if (filename == []) or (filename[0] == ''):
 		showinfo("Warning", "You must select a video using the 'Choose Video' button before choosing a function")
-		
 	else:
 		if choice == 1: 
 			copyCol()
