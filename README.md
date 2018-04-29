@@ -1,4 +1,4 @@
-# CMPT365 Project
+# Multimedia Project
 
 This project was written in Python 2.7.13. It should work for any Python 2.7 release.  
 
